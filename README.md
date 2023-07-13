@@ -4,8 +4,6 @@ This video player package is a custom video player made specifically for Flutter
 
 ## Features
 
-<br />
-
 * Perform any action on the player which includes play, pause, replay, and menu.
 
 * An optional menu display which consists of 2 key features: changing the playback speed and mute/unmute.
@@ -30,9 +28,7 @@ This video player package is a custom video player made specifically for Flutter
 
 ## How to use this package
 
-<br />
-
-If you wanted to display a video which source comes from a network(url), 
+If you want to display a video which source comes from a network, 
 
 ```dart
 CustomVideoPlayer(
