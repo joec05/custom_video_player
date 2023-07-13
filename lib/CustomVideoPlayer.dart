@@ -86,7 +86,7 @@ class CustomVideoPlayerState extends State<CustomVideoPlayer> {
 
   void initializeController(url) async{
     if(widget.videoSourceType == VideoSourceType.network){
-      playerController = ValueNotifier(VideoPlayerController.network(url));
+      playerController = ValueNotifier(VideoPlayerController.networkUrl(url));
     }else if(widget.videoSourceType == VideoSourceType.asset){
       playerController = ValueNotifier(VideoPlayerController.asset(widget.videoLocation));
     }
@@ -524,7 +524,7 @@ class CustomVideoPlayerState extends State<CustomVideoPlayer> {
                                                     builder: (BuildContext context, String displayCurrentDuration, Widget? child) {
                                                       return widget.durationEndDisplay == DurationEndDisplay.totalDuration ?
                                                         Text(
-                                                          '${displayCurrentDuration} / ${_formatDuration(videoPlayerController.value.duration)}',
+                                                          '$displayCurrentDuration / ${_formatDuration(videoPlayerController.value.duration)}',
                                                           style: TextStyle(fontSize: standardTextFontSize)
                                                         )
                                                       : 
@@ -532,7 +532,7 @@ class CustomVideoPlayerState extends State<CustomVideoPlayer> {
                                                           valueListenable: timeRemaining,
                                                           builder: (BuildContext context, Duration timeRemaining, Widget? child) {
                                                             return Text(
-                                                              '${displayCurrentDuration} / -${_formatDuration(timeRemaining)}',
+                                                              '$displayCurrentDuration / -${_formatDuration(timeRemaining)}',
                                                               style: TextStyle(fontSize: standardTextFontSize)
                                                             );
                                                           }
