@@ -86,7 +86,7 @@ class CustomVideoPlayerState extends State<CustomVideoPlayer> {
 
   void initializeController(url) async{
     if(widget.videoSourceType == VideoSourceType.network){
-      playerController = ValueNotifier(VideoPlayerController.networkUrl(url));
+      playerController = ValueNotifier(VideoPlayerController.networkUrl(Uri.parse(url)));
     }else if(widget.videoSourceType == VideoSourceType.asset){
       playerController = ValueNotifier(VideoPlayerController.asset(widget.videoLocation));
     }
