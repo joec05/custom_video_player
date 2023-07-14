@@ -2,6 +2,11 @@ name: custom_video_player
 description: A custom video player with a unique design and rich features.
 homepage: https://github.com/joec05/custom_video_player
 repository: https://github.com/joec05/custom_video_player
+platforms:
+  android:
+    pluginClass: CustomVideoPlayer
+  ios: null
+  web: null
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.

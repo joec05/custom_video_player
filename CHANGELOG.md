@@ -4,4 +4,4 @@ Earliest version of Custom Video Player.
 
 ## 1.0.1
 
-Fix static errors.
+Fix errors, update the platform's compatibility', re-fix the sizing system, add examples and comments.

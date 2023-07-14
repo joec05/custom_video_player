@@ -1,13 +1,12 @@
 // ignore_for_file: prefer_typing_uninitialized_variables
 
 import 'dart:async';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:video_player/video_player.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import 'dart:math';
-import 'styles/AppStyles.dart';
 
 enum AudioState{
   mute, unmute
@@ -52,29 +51,46 @@ class CustomVideoPlayer extends StatefulWidget {
 }
 
 class CustomVideoPlayerState extends State<CustomVideoPlayer> {
-
   late ValueNotifier<VideoPlayerController> playerController;
   ValueNotifier<Duration> timeRemaining = ValueNotifier(Duration.zero);
   ValueNotifier<bool> overlayVisible = ValueNotifier(true);
   Timer? _overlayTimer;
-  ValueNotifier<bool> isDraggingSlider = ValueNotifier(false);
+  ValueNotifier<bool> isDraggingSlider = ValueNotifier(false); //this variable is necessary to prevent the slider updating as the video plays when the user is dragging the slider
   ValueNotifier<double> currentPosition = ValueNotifier(0.0);
-  ValueNotifier<bool> hasPlayedOnce = ValueNotifier(false);
-  ValueNotifier<String> displayCurrentDuration = ValueNotifier('00:00');
+  ValueNotifier<bool> hasPlayedOnce = ValueNotifier(false); //this variable is necessary to indicate that the user has played the video and will no longer display the play_circle icon
+  ValueNotifier<String> displayCurrentDuration = ValueNotifier('00:00'); //this variable will be displayed indicating the current duration / slided duration
   TapDownDetails _doubleTapDetails = TapDownDetails();
-  ValueNotifier<bool> isSkipping = ValueNotifier<bool>(false);
-  ValueNotifier<bool> isRewinding = ValueNotifier<bool>(false);
-  OverlayEntry? overlayEntry;
-  ValueNotifier<bool> isFullScreenValue = ValueNotifier(false);
-  AudioState audioState = AudioState.unmute;
-  double currentPlaybackSpeed = 1.0;
+  ValueNotifier<bool> isSkipping = ValueNotifier<bool>(false); //this variable is necessary to indicate the user has skipped the video and will display the icon as well as start the timer
+  ValueNotifier<bool> isRewinding = ValueNotifier<bool>(false); //this variable is necessary to indicate the user has rewound the video and will display the icon as well as start the timer
+  ValueNotifier<bool> isFullScreenValue = ValueNotifier(false); //this variable is necessary to indicate which icon to display depending on whether the user has opened the full or not
+  AudioState audioState = AudioState.unmute; //this variable is neccessary to store the current state of the VideoPlayerController's audio: whether it is currently muted or unmuted
+  double currentPlaybackSpeed = 1.0; //this variable is necessary to mark out the default current playback speed when trying to change the playback speed
+
+  var standardTextFontSize = 14.5; //font size of the text in this page
+
+  var videoControlActionIconSize = 50.0; //size of the play, pause, replay icons 
+
+  var menuMainContainerButtonMargin = EdgeInsets.symmetric(vertical: 0.01 * window.physicalSize.height/ window.devicePixelRatio); //top and bottom margin of the buttons in the menu page
+
+  var menuButtonWidth = 0.8 * window.physicalSize.width / window.devicePixelRatio; //width of the buttons in the menu page
+
+  var menuButtonStyle = ElevatedButton.styleFrom( //the styling of the buttons in the menu page
+    backgroundColor: Colors.orange,
+    fixedSize: Size(0.8 * window.physicalSize.width / window.devicePixelRatio, 0.075 * window.physicalSize.height/ window.devicePixelRatio),
+    textStyle: TextStyle(
+      fontSize: 16.9,
+      fontWeight: FontWeight.w400
+    )
+  );
+
+  var videoControlFullScreenIconSize = 30.0; //size of the full screen and shrink screen icons
 
   @override
   void initState(){
     super.initState();
     if(widget.videoSourceType != VideoSourceType.file){
       initializeController(widget.videoUrl);
-    }else{
+    }else{ //if the video source is a file
       playerController = ValueNotifier(widget.playerController);
       playerController.value.addListener(() {
         updateCurrentPosition();
@@ -85,10 +101,10 @@ class CustomVideoPlayerState extends State<CustomVideoPlayer> {
   }
 
   void initializeController(url) async{
-    if(widget.videoSourceType == VideoSourceType.network){
+    if(widget.videoSourceType == VideoSourceType.network){//if the video source is a network
       playerController = ValueNotifier(VideoPlayerController.networkUrl(Uri.parse(url)));
     }else if(widget.videoSourceType == VideoSourceType.asset){
-      playerController = ValueNotifier(VideoPlayerController.asset(widget.videoLocation));
+      playerController = ValueNotifier(VideoPlayerController.asset(widget.videoLocation)); //if the video source is an asset
     }
     playerController.value.addListener(() {
       if(mounted){
@@ -100,7 +116,7 @@ class CustomVideoPlayerState extends State<CustomVideoPlayer> {
     await playerController.value.initialize();
   }
 
-  void updateCurrentPosition(){
+  void updateCurrentPosition(){ //update position of slider while video is playing as well as the time remaining
     if(mounted){
       if(!isDraggingSlider.value && playerController.value.value.isInitialized){
         currentPosition.value = playerController.value.value.position.inMilliseconds / playerController.value.value.duration.inMilliseconds;
@@ -112,14 +128,14 @@ class CustomVideoPlayerState extends State<CustomVideoPlayer> {
     }
   }
 
-  void updateOverlayIcon(){
+  void updateOverlayIcon(){ //triggered when the video ends
     if(playerController.value.value.position.inMilliseconds.toDouble() == playerController.value.value.duration.inMilliseconds.toDouble() && !playerController.value.value.isPlaying && mounted){
       overlayVisible.value = true;
       _overlayTimer?.cancel();
     }
   }
 
-  String _formatDuration(Duration duration) {
+  String _formatDuration(Duration duration) { //convert duration to string
     String hours = (duration.inHours).toString().padLeft(2, '0');
     String minutes = (duration.inMinutes % 60).toString().padLeft(2, '0');
     String seconds = (duration.inSeconds % 60).toString().padLeft(2, '0');
@@ -131,7 +147,7 @@ class CustomVideoPlayerState extends State<CustomVideoPlayer> {
     }
   }
 
-  String formatSeconds(int seconds) {
+  String formatSeconds(int seconds) { //convert total seconds to string
     int hours = seconds ~/ 3600;
     int minutes = (seconds ~/ 60) % 60;
     int remainingSeconds = seconds % 60;
@@ -149,17 +165,17 @@ class CustomVideoPlayerState extends State<CustomVideoPlayer> {
 
 
   void _togglePlayPause() {
-    if(!hasPlayedOnce.value){
+    if(!hasPlayedOnce.value){ //if the video player is just initialized and hasn't played at all
       playerController.value.play();
       Timer(Duration(milliseconds: 100), () {
         _startOverlayTimer();
       });
-    }else if(playerController.value.value.position.inMilliseconds.toDouble() == playerController.value.value.duration.inMilliseconds.toDouble() && !playerController.value.value.isPlaying){
+    }else if(playerController.value.value.position.inMilliseconds.toDouble() == playerController.value.value.duration.inMilliseconds.toDouble() && !playerController.value.value.isPlaying){ //if video has ended and no longer plays
       playerController.value.play();
       playerController.value.seekTo(Duration(milliseconds: 0));
-    }else if(playerController.value.value.isPlaying){
+    }else if(playerController.value.value.isPlaying){ //if the video is playing
       playerController.value.pause();
-    }else if(!playerController.value.value.isPlaying){
+    }else if(!playerController.value.value.isPlaying){ //if the video is paused
       playerController.value.play();
     }
     hasPlayedOnce.value = true;
@@ -168,22 +184,22 @@ class CustomVideoPlayerState extends State<CustomVideoPlayer> {
 
   @override
   void dispose() {
-    _overlayTimer?.cancel();
-    playerController.value.dispose();
+    _overlayTimer?.cancel(); //dispose the timer
+    playerController.value.dispose(); //dispose the VideoPlayerController
     super.dispose();
   }
   
-  void onSliderStart(value){
+  void onSliderStart(value){ //triggered if the user started dragging the slider
     overlayVisible.value = true;
     _overlayTimer?.cancel();
-    currentPosition.value = value;
+    currentPosition.value = value; //update the position of the slider
   }
 
-  void onSliderChange(value){
+  void onSliderChange(value){ //triggered if the user is dragging the user
     isDraggingSlider.value = true;
-    currentPosition.value = value;
+    currentPosition.value = value; //update the position of the slider
     var currentSecond = (value * playerController.value.value.duration.inMilliseconds / 1000).floor();
-    displayCurrentDuration.value = formatSeconds(currentSecond);
+    displayCurrentDuration.value = formatSeconds(currentSecond); //only the display of the current duration will change, the video will still play as usual
   }
 
   void onSliderEnd(value){
@@ -279,14 +295,14 @@ class CustomVideoPlayerState extends State<CustomVideoPlayer> {
 
   void _handleDoubleTap() {
     Offset selectedPosition = _doubleTapDetails.localPosition;
-    if(selectedPosition.dx >= 0 && selectedPosition.dx <= 35.w){
+    if(selectedPosition.dx >= 0 && selectedPosition.dx <= window.physicalSize.width / window.devicePixelRatio * 0.35){
       rewind();
       isRewinding.value = true;
       isSkipping.value = false;
       Timer(Duration(milliseconds: 1500), () {
         isRewinding.value = false;
       });
-    }else if(selectedPosition.dx >= 65.w && selectedPosition.dx <= 100.w){
+    }else if(selectedPosition.dx >= window.physicalSize.width / window.devicePixelRatio * 0.65 && selectedPosition.dx <= window.physicalSize.width / window.devicePixelRatio){
       skip();
       isSkipping.value = true;
       isRewinding.value = false;
@@ -454,7 +470,7 @@ class CustomVideoPlayerState extends State<CustomVideoPlayer> {
                               duration: Duration(milliseconds: 500),
                               child: GestureDetector(
                                 onTap: displayVideoOptions,
-                                child: Icon(Icons.menu, size: videoControlFullScreenIconSize)
+                                child: Icon(Icons.menu, size: 32.5)
                               )
                             )
                           )
@@ -502,7 +518,7 @@ class CustomVideoPlayerState extends State<CustomVideoPlayer> {
                                 onTap: (){},
                                 child: Container(
                                  
-                                  padding: EdgeInsets.symmetric(horizontal: 1.5.w, vertical: 1.h),
+                                  padding: EdgeInsets.symmetric(horizontal: 0.01 * window.physicalSize.width / window.devicePixelRatio, vertical: window.physicalSize.height/ window.devicePixelRatio * 0.01),
                                   color: widget.overlayBackgroundColor,
                                   child: AnimatedOpacity(
                                     opacity: overlayVisible && hasPlayedOnce ? 1.0 : 0.0,
@@ -514,7 +530,7 @@ class CustomVideoPlayerState extends State<CustomVideoPlayer> {
                                           valueListenable: isFullScreenValue,
                                           builder: (BuildContext context, bool isFullScreen, Widget? child) {
                                             return Container(
-                                              padding: EdgeInsets.symmetric(horizontal: 5.w),
+                                              padding: EdgeInsets.symmetric(horizontal: window.physicalSize.width / window.devicePixelRatio * 0.025),
                                               child:Row(
                                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                 children: [
@@ -540,7 +556,6 @@ class CustomVideoPlayerState extends State<CustomVideoPlayer> {
                                                     }
                                                   ),
                                                   Container(
-                                                    margin: videoControlFullScreenIconContainerMargin,
                                                     child: GestureDetector(
                                                       onTap: () async{
                                                         if(!isFullScreen){
@@ -616,14 +631,14 @@ class CustomVideoPlayerState extends State<CustomVideoPlayer> {
                 valueListenable: isRewinding,
                 builder: (BuildContext context, bool isRewinding, Widget? child) {
                   return Container(
-                    width: 50.w,
+                    width: window.physicalSize.width / window.devicePixelRatio * 0.5,
                     child: Center(
                       child: AnimatedOpacity(
                         opacity: isRewinding ? 1.0 : 0.0,
                         duration: Duration(milliseconds: 250),
                         child: Container(
                           color: widget.pressablesBackgroundColor,
-                          padding: EdgeInsets.all(2.w),
+                          padding: EdgeInsets.all(window.physicalSize.width / window.devicePixelRatio * 0.02),
                           child: Icon(FontAwesomeIcons.backward, size: 30)
                         )
                       )
@@ -638,14 +653,14 @@ class CustomVideoPlayerState extends State<CustomVideoPlayer> {
                 valueListenable: isSkipping,
                 builder: (BuildContext context, bool isSkipping, Widget? child) {
                   return Container(
-                    width: 50.w,
+                    width: window.physicalSize.width / window.devicePixelRatio * 0.5,
                     child: Center(
                       child: AnimatedOpacity(
                         opacity: isSkipping ? 1.0 : 0.0,
                         duration: Duration(milliseconds: 250),
                         child: Container(
                           color: widget.pressablesBackgroundColor,
-                          padding: EdgeInsets.all(2.w),
+                          padding: EdgeInsets.all(window.physicalSize.width / window.devicePixelRatio * 0.02),
                           child: Icon(FontAwesomeIcons.forward, size: 30)
                         )
                       )
