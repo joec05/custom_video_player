@@ -69,13 +69,13 @@ class CustomVideoPlayerState extends State<CustomVideoPlayer> {
 
   var videoControlActionIconSize = 50.0; //size of the play, pause, replay icons 
 
-  var menuMainContainerButtonMargin = EdgeInsets.symmetric(vertical: 0.01 * PlatformDispatcher.instance.views.first.physicalSize.height/ window.devicePixelRatio); //top and bottom margin of the buttons in the menu page
+  var menuMainContainerButtonMargin = EdgeInsets.symmetric(vertical: 0.01 * PlatformDispatcher.instance.views.first.physicalSize.height/ PlatformDispatcher.instance.views.first.devicePixelRatio); //top and bottom margin of the buttons in the menu page
 
-  var menuButtonWidth = 0.8 * PlatformDispatcher.instance.views.first.physicalSize.width / window.devicePixelRatio; //width of the buttons in the menu page
+  var menuButtonWidth = 0.8 * PlatformDispatcher.instance.views.first.physicalSize.width / PlatformDispatcher.instance.views.first.devicePixelRatio; //width of the buttons in the menu page
 
   var menuButtonStyle = ElevatedButton.styleFrom( //the styling of the buttons in the menu page
     backgroundColor: Colors.orange,
-    fixedSize: Size(0.8 * PlatformDispatcher.instance.views.first.physicalSize.width / window.devicePixelRatio, 0.075 * PlatformDispatcher.instance.views.first.physicalSize.height/ window.devicePixelRatio),
+    fixedSize: Size(0.8 * PlatformDispatcher.instance.views.first.physicalSize.width / PlatformDispatcher.instance.views.first.devicePixelRatio, 0.075 * PlatformDispatcher.instance.views.first.physicalSize.height/ PlatformDispatcher.instance.views.first.devicePixelRatio),
     textStyle: const TextStyle(
       fontSize: 16.9,
       fontWeight: FontWeight.w400
@@ -294,14 +294,14 @@ class CustomVideoPlayerState extends State<CustomVideoPlayer> {
 
   void _handleDoubleTap() {
     Offset selectedPosition = _doubleTapDetails.localPosition;
-    if(selectedPosition.dx >= 0 && selectedPosition.dx <= PlatformDispatcher.instance.views.first.physicalSize.width / window.devicePixelRatio * 0.35){
+    if(selectedPosition.dx >= 0 && selectedPosition.dx <= PlatformDispatcher.instance.views.first.physicalSize.width / PlatformDispatcher.instance.views.first.devicePixelRatio * 0.35){
       rewind();
       isRewinding.value = true;
       isSkipping.value = false;
       Timer(const Duration(milliseconds: 1500), () {
         isRewinding.value = false;
       });
-    }else if(selectedPosition.dx >= PlatformDispatcher.instance.views.first.physicalSize.width / window.devicePixelRatio * 0.65 && selectedPosition.dx <= PlatformDispatcher.instance.views.first.physicalSize.width / window.devicePixelRatio){
+    }else if(selectedPosition.dx >= PlatformDispatcher.instance.views.first.physicalSize.width / PlatformDispatcher.instance.views.first.devicePixelRatio * 0.65 && selectedPosition.dx <= PlatformDispatcher.instance.views.first.physicalSize.width / PlatformDispatcher.instance.views.first.devicePixelRatio){
       skip();
       isSkipping.value = true;
       isRewinding.value = false;
@@ -516,7 +516,7 @@ class CustomVideoPlayerState extends State<CustomVideoPlayer> {
                               onTap: (){},
                               child: Container(
                                
-                                padding: EdgeInsets.symmetric(horizontal: 0.01 * PlatformDispatcher.instance.views.first.physicalSize.width / window.devicePixelRatio, vertical: PlatformDispatcher.instance.views.first.physicalSize.height/ window.devicePixelRatio * 0.01),
+                                padding: EdgeInsets.symmetric(horizontal: 0.01 * PlatformDispatcher.instance.views.first.physicalSize.width / PlatformDispatcher.instance.views.first.devicePixelRatio, vertical: PlatformDispatcher.instance.views.first.physicalSize.height/ PlatformDispatcher.instance.views.first.devicePixelRatio * 0.01),
                                 color: widget.overlayBackgroundColor,
                                 child: AnimatedOpacity(
                                   opacity: overlayVisible && hasPlayedOnce ? 1.0 : 0.0,
@@ -528,7 +528,7 @@ class CustomVideoPlayerState extends State<CustomVideoPlayer> {
                                         valueListenable: isFullScreenValue,
                                         builder: (BuildContext context, bool isFullScreen, Widget? child) {
                                           return Container(
-                                            padding: EdgeInsets.symmetric(horizontal: PlatformDispatcher.instance.views.first.physicalSize.width / window.devicePixelRatio * 0.025),
+                                            padding: EdgeInsets.symmetric(horizontal: PlatformDispatcher.instance.views.first.physicalSize.width / PlatformDispatcher.instance.views.first.devicePixelRatio * 0.025),
                                             child:Row(
                                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                               children: [
@@ -627,14 +627,14 @@ class CustomVideoPlayerState extends State<CustomVideoPlayer> {
               valueListenable: isRewinding,
               builder: (BuildContext context, bool isRewinding, Widget? child) {
                 return SizedBox(
-                  width: PlatformDispatcher.instance.views.first.physicalSize.width / window.devicePixelRatio * 0.5,
+                  width: PlatformDispatcher.instance.views.first.physicalSize.width / PlatformDispatcher.instance.views.first.devicePixelRatio * 0.5,
                   child: Center(
                     child: AnimatedOpacity(
                       opacity: isRewinding ? 1.0 : 0.0,
                       duration: const Duration(milliseconds: 250),
                       child: Container(
                         color: widget.pressablesBackgroundColor,
-                        padding: EdgeInsets.all(PlatformDispatcher.instance.views.first.physicalSize.width / window.devicePixelRatio * 0.02),
+                        padding: EdgeInsets.all(PlatformDispatcher.instance.views.first.physicalSize.width / PlatformDispatcher.instance.views.first.devicePixelRatio * 0.02),
                         child: const Icon(FontAwesomeIcons.backward, size: 30)
                       )
                     )
@@ -649,14 +649,14 @@ class CustomVideoPlayerState extends State<CustomVideoPlayer> {
               valueListenable: isSkipping,
               builder: (BuildContext context, bool isSkipping, Widget? child) {
                 return SizedBox(
-                  width: PlatformDispatcher.instance.views.first.physicalSize.width / window.devicePixelRatio * 0.5,
+                  width: PlatformDispatcher.instance.views.first.physicalSize.width / PlatformDispatcher.instance.views.first.devicePixelRatio * 0.5,
                   child: Center(
                     child: AnimatedOpacity(
                       opacity: isSkipping ? 1.0 : 0.0,
                       duration: const Duration(milliseconds: 250),
                       child: Container(
                         color: widget.pressablesBackgroundColor,
-                        padding: EdgeInsets.all(PlatformDispatcher.instance.views.first.physicalSize.width / window.devicePixelRatio * 0.02),
+                        padding: EdgeInsets.all(PlatformDispatcher.instance.views.first.physicalSize.width / PlatformDispatcher.instance.views.first.devicePixelRatio * 0.02),
                         child: const Icon(FontAwesomeIcons.forward, size: 30)
                       )
                     )

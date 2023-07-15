@@ -12,12 +12,16 @@ Adding example codes and fixing deprecated codes.
 
 ## 1.0.3
 
-fix static analysis
+handle 'window' deprecation
 
 ## 1.0.4
 
-fix static analysis
+handle 'window' deprecation
 
 ## 1.0.5
 
 handle 'window' deprecation
+
+## 1.0.6
+
+handle 'window' deprecation in devicePixelRatio
