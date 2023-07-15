@@ -57,7 +57,7 @@ class _MyHomePageState extends State<MyHomePage> {
               pressablesBackgroundColor: Colors.teal, //background color of the pressable icons such as play, pause, replay, and menu
               overlayDisplayDuration: 3000, //how long to display the overlay before it disappears, in ms
             ),
-            SizedBox(
+            const SizedBox(
               height: 50
             ),
             CustomVideoPlayer(

@@ -1,5 +1,4 @@
-// ignore_for_file: prefer_typing_uninitialized_variables
-
+// ignore: file_names
 import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
@@ -22,12 +21,12 @@ enum DurationEndDisplay{
 }
 
 class CustomVideoPlayer extends StatefulWidget {
-  final videoUrl;
-  final playerController;
+  final String? videoUrl;
+  final VideoPlayerController? playerController;
   final int skipDuration;
   final int rewindDuration;
   final VideoSourceType videoSourceType;
-  final videoLocation;
+  final String? videoLocation;
   final DurationEndDisplay durationEndDisplay;
   final bool displayMenu;
   final Color thumbColor;
@@ -70,14 +69,14 @@ class CustomVideoPlayerState extends State<CustomVideoPlayer> {
 
   var videoControlActionIconSize = 50.0; //size of the play, pause, replay icons 
 
-  var menuMainContainerButtonMargin = EdgeInsets.symmetric(vertical: 0.01 * WidgetsBinding.instance.window.physicalSize.height/ WidgetsBinding.instance.window.devicePixelRatio); //top and bottom margin of the buttons in the menu page
+  var menuMainContainerButtonMargin = EdgeInsets.symmetric(vertical: 0.01 * PlatformDispatcher.instance.views.first.physicalSize.height/ window.devicePixelRatio); //top and bottom margin of the buttons in the menu page
 
-  var menuButtonWidth = 0.8 * WidgetsBinding.instance.window.physicalSize.width / WidgetsBinding.instance.window.devicePixelRatio; //width of the buttons in the menu page
+  var menuButtonWidth = 0.8 * PlatformDispatcher.instance.views.first.physicalSize.width / window.devicePixelRatio; //width of the buttons in the menu page
 
   var menuButtonStyle = ElevatedButton.styleFrom( //the styling of the buttons in the menu page
     backgroundColor: Colors.orange,
-    fixedSize: Size(0.8 * WidgetsBinding.instance.window.physicalSize.width / WidgetsBinding.instance.window.devicePixelRatio, 0.075 * WidgetsBinding.instance.window.physicalSize.height/ WidgetsBinding.instance.window.devicePixelRatio),
-    textStyle: TextStyle(
+    fixedSize: Size(0.8 * PlatformDispatcher.instance.views.first.physicalSize.width / window.devicePixelRatio, 0.075 * PlatformDispatcher.instance.views.first.physicalSize.height/ window.devicePixelRatio),
+    textStyle: const TextStyle(
       fontSize: 16.9,
       fontWeight: FontWeight.w400
     )
@@ -91,7 +90,7 @@ class CustomVideoPlayerState extends State<CustomVideoPlayer> {
     if(widget.videoSourceType != VideoSourceType.file){
       initializeController(widget.videoUrl);
     }else{ //if the video source is a file
-      playerController = ValueNotifier(widget.playerController);
+      playerController = ValueNotifier(widget.playerController!);
       playerController.value.addListener(() {
         updateCurrentPosition();
         updateOverlayIcon();
@@ -104,7 +103,7 @@ class CustomVideoPlayerState extends State<CustomVideoPlayer> {
     if(widget.videoSourceType == VideoSourceType.network){//if the video source is a network
       playerController = ValueNotifier(VideoPlayerController.networkUrl(Uri.parse(url)));
     }else if(widget.videoSourceType == VideoSourceType.asset){
-      playerController = ValueNotifier(VideoPlayerController.asset(widget.videoLocation)); //if the video source is an asset
+      playerController = ValueNotifier(VideoPlayerController.asset(widget.videoLocation!)); //if the video source is an asset
     }
     playerController.value.addListener(() {
       if(mounted){
@@ -155,10 +154,10 @@ class CustomVideoPlayerState extends State<CustomVideoPlayer> {
     String formattedTime = '';
     
     if (hours > 0) {
-      formattedTime += hours.toString().padLeft(2, '0') + ':';
+      formattedTime += '${hours.toString().padLeft(2, '0')}:';
     }
     
-    formattedTime += minutes.toString().padLeft(2, '0') + ':' + remainingSeconds.toString().padLeft(2, '0');
+    formattedTime += '${minutes.toString().padLeft(2, '0')}:${remainingSeconds.toString().padLeft(2, '0')}';
     
     return formattedTime;
   }
@@ -167,12 +166,12 @@ class CustomVideoPlayerState extends State<CustomVideoPlayer> {
   void _togglePlayPause() {
     if(!hasPlayedOnce.value){ //if the video player is just initialized and hasn't played at all
       playerController.value.play();
-      Timer(Duration(milliseconds: 100), () {
+      Timer(const Duration(milliseconds: 100), () {
         _startOverlayTimer();
       });
     }else if(playerController.value.value.position.inMilliseconds.toDouble() == playerController.value.value.duration.inMilliseconds.toDouble() && !playerController.value.value.isPlaying){ //if video has ended and no longer plays
       playerController.value.play();
-      playerController.value.seekTo(Duration(milliseconds: 0));
+      playerController.value.seekTo(const Duration(milliseconds: 0));
     }else if(playerController.value.value.isPlaying){ //if the video is playing
       playerController.value.pause();
     }else if(!playerController.value.value.isPlaying){ //if the video is paused
@@ -206,14 +205,14 @@ class CustomVideoPlayerState extends State<CustomVideoPlayer> {
     var duration = ((value * playerController.value.value.duration.inMilliseconds) ~/ 10) * 10;
     playerController.value.seekTo(Duration(milliseconds: duration));
     currentPosition.value = value;
-    Timer(Duration(milliseconds: 25), () {
+    Timer(const Duration(milliseconds: 25), () {
       if(!playerController.value.value.isPlaying){
         playerController.value.play();
       }
       isDraggingSlider.value = false;
       overlayVisible.value = true;
       if(value < 1){
-        Timer(Duration(milliseconds: 100), () {
+        Timer(const Duration(milliseconds: 100), () {
           _startOverlayTimer();
         });
       }else if(value >= 1){
@@ -225,7 +224,7 @@ class CustomVideoPlayerState extends State<CustomVideoPlayer> {
   void skip(){
     int duration = min(playerController.value.value.duration.inMilliseconds, playerController.value.value.position.inMilliseconds + widget.skipDuration);
     playerController.value.seekTo(Duration(milliseconds: duration));
-    Timer(Duration(milliseconds: 25), () {
+    Timer(const Duration(milliseconds: 25), () {
       if(!playerController.value.value.isPlaying){
         playerController.value.play();
       }
@@ -238,7 +237,7 @@ class CustomVideoPlayerState extends State<CustomVideoPlayer> {
   void rewind(){
     int duration = max(0, playerController.value.value.position.inMilliseconds - widget.rewindDuration);
     playerController.value.seekTo(Duration(milliseconds: duration));
-    Timer(Duration(milliseconds: 25), () {
+    Timer(const Duration(milliseconds: 25), () {
       if(!playerController.value.value.isPlaying){
         playerController.value.play();
       }
@@ -269,7 +268,7 @@ class CustomVideoPlayerState extends State<CustomVideoPlayer> {
   }
 
   Widget displayActionIcon(VideoPlayerController playerController){
-    var icon;
+    IconData icon = Icons.play_circle;
     if(!playerController.value.isInitialized){
       icon = Icons.play_circle;
     }else{
@@ -295,18 +294,18 @@ class CustomVideoPlayerState extends State<CustomVideoPlayer> {
 
   void _handleDoubleTap() {
     Offset selectedPosition = _doubleTapDetails.localPosition;
-    if(selectedPosition.dx >= 0 && selectedPosition.dx <= WidgetsBinding.instance.window.physicalSize.width / WidgetsBinding.instance.window.devicePixelRatio * 0.35){
+    if(selectedPosition.dx >= 0 && selectedPosition.dx <= PlatformDispatcher.instance.views.first.physicalSize.width / window.devicePixelRatio * 0.35){
       rewind();
       isRewinding.value = true;
       isSkipping.value = false;
-      Timer(Duration(milliseconds: 1500), () {
+      Timer(const Duration(milliseconds: 1500), () {
         isRewinding.value = false;
       });
-    }else if(selectedPosition.dx >= WidgetsBinding.instance.window.physicalSize.width / WidgetsBinding.instance.window.devicePixelRatio * 0.65 && selectedPosition.dx <= WidgetsBinding.instance.window.physicalSize.width / WidgetsBinding.instance.window.devicePixelRatio){
+    }else if(selectedPosition.dx >= PlatformDispatcher.instance.views.first.physicalSize.width / window.devicePixelRatio * 0.65 && selectedPosition.dx <= PlatformDispatcher.instance.views.first.physicalSize.width / window.devicePixelRatio){
       skip();
       isSkipping.value = true;
       isRewinding.value = false;
-      Timer(Duration(milliseconds: 1500), () {
+      Timer(const Duration(milliseconds: 1500), () {
         isSkipping.value = false;
       });
     }
@@ -329,7 +328,7 @@ class CustomVideoPlayerState extends State<CustomVideoPlayer> {
                       Navigator.of(context).pop();
                       displayPlaybackSpeedOptions();
                     },
-                    child: Text('Set playback speed')
+                    child: const Text('Set playback speed')
                   )
                 )
               ),
@@ -375,7 +374,7 @@ class CustomVideoPlayerState extends State<CustomVideoPlayer> {
             return false;
           },
           child: Scaffold(
-            body: Container(
+            body: SizedBox(
               width: double.infinity,
               height: double.infinity,
               child: videoPlayerComponent(playerController.value, context2),
@@ -421,7 +420,7 @@ class CustomVideoPlayerState extends State<CustomVideoPlayer> {
                   :
                     ElevatedButton.icon(
                       style: menuButtonStyle,
-                      icon: Icon(Icons.check),
+                      icon: const Icon(Icons.check),
                       onPressed: (){
                         playerController.value.setPlaybackSpeed(playbackSpeeds[i]);
                         Navigator.of(context).pop();
@@ -439,238 +438,234 @@ class CustomVideoPlayerState extends State<CustomVideoPlayer> {
 
 
   Widget videoPlayerComponent(VideoPlayerController videoPlayerController, context2){
-    Widget component = Container(
-      child: GestureDetector(
-        onTap: _toggleOverlay,
-        onDoubleTapDown: _handleDoubleTapDown,
-        onDoubleTap: _handleDoubleTap,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Center(
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  AspectRatio(
-                    aspectRatio: videoPlayerController.value.aspectRatio,
-                    child: VideoPlayer(videoPlayerController),
-                  ),
-                  Positioned(
-                    right: 10,
-                    top: 10,
-                    
-                    child: ValueListenableBuilder<bool>(
-                      valueListenable: overlayVisible,
-                      builder: (BuildContext context, bool overlayVisible, Widget? child) {
-                        return overlayVisible && widget.displayMenu ? 
-                          Container(
-                            color: widget.pressablesBackgroundColor,
-                            child: AnimatedOpacity(
-                              opacity: overlayVisible ? 1.0 : 0.0,
-                              duration: Duration(milliseconds: 500),
-                              child: GestureDetector(
-                                onTap: displayVideoOptions,
-                                child: Icon(Icons.menu, size: 32.5)
-                              )
+    Widget component = GestureDetector(
+      onTap: _toggleOverlay,
+      onDoubleTapDown: _handleDoubleTapDown,
+      onDoubleTap: _handleDoubleTap,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Center(
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                AspectRatio(
+                  aspectRatio: videoPlayerController.value.aspectRatio,
+                  child: VideoPlayer(videoPlayerController),
+                ),
+                Positioned(
+                  right: 10,
+                  top: 10,
+                  
+                  child: ValueListenableBuilder<bool>(
+                    valueListenable: overlayVisible,
+                    builder: (BuildContext context, bool overlayVisible, Widget? child) {
+                      return overlayVisible && widget.displayMenu ? 
+                        Container(
+                          color: widget.pressablesBackgroundColor,
+                          child: AnimatedOpacity(
+                            opacity: overlayVisible ? 1.0 : 0.0,
+                            duration: const Duration(milliseconds: 500),
+                            child: GestureDetector(
+                              onTap: displayVideoOptions,
+                              child: const Icon(Icons.menu, size: 32.5)
                             )
                           )
-                        : Container();
-                      }
-                    )
-                  ),
-                  Positioned.fill(
-                    left: 0,
-                    child: Center(
-                      child: ValueListenableBuilder<bool>(
-                        valueListenable: overlayVisible,
-                        builder: (BuildContext context, bool overlayVisible, Widget? child) {
-                          return ValueListenableBuilder(
-                            valueListenable: videoPlayerController,
-                            builder: (BuildContext context, playerController, Widget? child) {
-                              return overlayVisible ? 
-                                 GestureDetector(
-                                  onTap: _togglePlayPause,
-                                  child: AnimatedOpacity(
-                                    opacity: overlayVisible ? 1.0 : 0.0,
-                                    duration: Duration(milliseconds: 500),
-                                    child: displayActionIcon(videoPlayerController)
-                                  )
-                                )
-                              : Container();
-                            }
-                          );
-                        }
-                      )
-                    )
-                  ),
-                  Positioned(
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
+                        )
+                      : Container();
+                    }
+                  )
+                ),
+                Positioned.fill(
+                  left: 0,
+                  child: Center(
                     child: ValueListenableBuilder<bool>(
                       valueListenable: overlayVisible,
                       builder: (BuildContext context, bool overlayVisible, Widget? child) {
-                        return ValueListenableBuilder<bool>(
-                          valueListenable: hasPlayedOnce,
-                          builder: (BuildContext context, bool hasPlayedOnce, Widget? child) {
-                            return overlayVisible && hasPlayedOnce ?
-                              GestureDetector(
-                                onTap: (){},
-                                child: Container(
-                                 
-                                  padding: EdgeInsets.symmetric(horizontal: 0.01 * WidgetsBinding.instance.window.physicalSize.width / WidgetsBinding.instance.window.devicePixelRatio, vertical: WidgetsBinding.instance.window.physicalSize.height/ WidgetsBinding.instance.window.devicePixelRatio * 0.01),
-                                  color: widget.overlayBackgroundColor,
-                                  child: AnimatedOpacity(
-                                    opacity: overlayVisible && hasPlayedOnce ? 1.0 : 0.0,
-                                    duration: Duration(milliseconds: 500),
-                                    child: Column(
-                                      children: [
-                                      
-                                        ValueListenableBuilder<bool>(
-                                          valueListenable: isFullScreenValue,
-                                          builder: (BuildContext context, bool isFullScreen, Widget? child) {
-                                            return Container(
-                                              padding: EdgeInsets.symmetric(horizontal: WidgetsBinding.instance.window.physicalSize.width / WidgetsBinding.instance.window.devicePixelRatio * 0.025),
-                                              child:Row(
-                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                children: [
-                                                  
-                                                  ValueListenableBuilder<String>(
-                                                    valueListenable: displayCurrentDuration,
-                                                    builder: (BuildContext context, String displayCurrentDuration, Widget? child) {
-                                                      return widget.durationEndDisplay == DurationEndDisplay.totalDuration ?
-                                                        Text(
-                                                          '$displayCurrentDuration / ${_formatDuration(videoPlayerController.value.duration)}',
-                                                          style: TextStyle(fontSize: standardTextFontSize)
-                                                        )
-                                                      : 
-                                                        ValueListenableBuilder<Duration>(
-                                                          valueListenable: timeRemaining,
-                                                          builder: (BuildContext context, Duration timeRemaining, Widget? child) {
-                                                            return Text(
-                                                              '$displayCurrentDuration / -${_formatDuration(timeRemaining)}',
-                                                              style: TextStyle(fontSize: standardTextFontSize)
-                                                            );
-                                                          }
-                                                        );
-                                                    }
-                                                  ),
-                                                  Container(
-                                                    child: GestureDetector(
-                                                      onTap: () async{
-                                                        if(!isFullScreen){
-                                                          showFullScreenVideoPlayer(context);
-                                                          isFullScreenValue.value = true;
-                                                        }else{
-                                                          Navigator.of(context2).pop();
-                                                          isFullScreenValue.value = false;
-                                                        }
-                                                      },
-                                                      child: Icon(isFullScreen ? Icons.fullscreen_exit : Icons.fullscreen, size: videoControlFullScreenIconSize)
-                                                    )
-                                                  )
-                                                ]
-                                              )
-                                            );
-                                          }
-                                        ),
-                                          
-                                        Container(
-                                          height: 15,
-                                          child: SliderTheme(
-                                            data: SliderThemeData(
-                                              trackHeight: 3.0,
-                                              thumbColor: widget.thumbColor,
-                                              thumbShape: RoundSliderThumbShape(enabledThumbRadius: 5.0),
-                                              overlayShape: RoundSliderOverlayShape(overlayRadius: 0.0),
-                                              activeTrackColor: widget.activeTrackColor,
-                                              inactiveTrackColor: widget.inactiveTrackColor
-                                            ),
-                                            child: ValueListenableBuilder<double>(
-                                              valueListenable: currentPosition,
-                                              builder: (BuildContext context, double currentPosition, Widget? child) {
-                                                return Slider(
-                                                  min: 0.0,
-                                                  max: max(1.0, currentPosition),
-                                                  value: currentPosition,
-                                                  onChangeStart: ((value){
-                                                    onSliderStart(value);
-                                                  }),
-                                                  onChanged: (newValue) {
-                                                    onSliderChange(newValue);
-                                                  },
-                                                  onChangeEnd: (newValue){
-                                                    onSliderEnd(newValue);
-                                                  },
-                                                );
-                                              }
-                                            )
-                                          ),
-                                            
-                                        ),
-                                      ]
-                                    
-                                    )
-                                  )
+                        return ValueListenableBuilder(
+                          valueListenable: videoPlayerController,
+                          builder: (BuildContext context, playerController, Widget? child) {
+                            return overlayVisible ? 
+                               GestureDetector(
+                                onTap: _togglePlayPause,
+                                child: AnimatedOpacity(
+                                  opacity: overlayVisible ? 1.0 : 0.0,
+                                  duration: const Duration(milliseconds: 500),
+                                  child: displayActionIcon(videoPlayerController)
                                 )
                               )
-                              : Container();
+                            : Container();
                           }
                         );
                       }
                     )
-                    
-                  ),
-                ]
-              )
-            ),
-            
-            Positioned(
-              left: 0,
-              child: ValueListenableBuilder<bool>(
-                valueListenable: isRewinding,
-                builder: (BuildContext context, bool isRewinding, Widget? child) {
-                  return Container(
-                    width: WidgetsBinding.instance.window.physicalSize.width / WidgetsBinding.instance.window.devicePixelRatio * 0.5,
-                    child: Center(
-                      child: AnimatedOpacity(
-                        opacity: isRewinding ? 1.0 : 0.0,
-                        duration: Duration(milliseconds: 250),
-                        child: Container(
-                          color: widget.pressablesBackgroundColor,
-                          padding: EdgeInsets.all(WidgetsBinding.instance.window.physicalSize.width / WidgetsBinding.instance.window.devicePixelRatio * 0.02),
-                          child: Icon(FontAwesomeIcons.backward, size: 30)
-                        )
-                      )
-                    )
-                  );
-                }
-              )
-            ),
-            Positioned(
-              right: 0,
-              child: ValueListenableBuilder<bool>(
-                valueListenable: isSkipping,
-                builder: (BuildContext context, bool isSkipping, Widget? child) {
-                  return Container(
-                    width: WidgetsBinding.instance.window.physicalSize.width / WidgetsBinding.instance.window.devicePixelRatio * 0.5,
-                    child: Center(
-                      child: AnimatedOpacity(
-                        opacity: isSkipping ? 1.0 : 0.0,
-                        duration: Duration(milliseconds: 250),
-                        child: Container(
-                          color: widget.pressablesBackgroundColor,
-                          padding: EdgeInsets.all(WidgetsBinding.instance.window.physicalSize.width / WidgetsBinding.instance.window.devicePixelRatio * 0.02),
-                          child: Icon(FontAwesomeIcons.forward, size: 30)
-                        )
-                      )
-                    )
-                  );
-                }
-              )
+                  )
+                ),
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: ValueListenableBuilder<bool>(
+                    valueListenable: overlayVisible,
+                    builder: (BuildContext context, bool overlayVisible, Widget? child) {
+                      return ValueListenableBuilder<bool>(
+                        valueListenable: hasPlayedOnce,
+                        builder: (BuildContext context, bool hasPlayedOnce, Widget? child) {
+                          return overlayVisible && hasPlayedOnce ?
+                            GestureDetector(
+                              onTap: (){},
+                              child: Container(
+                               
+                                padding: EdgeInsets.symmetric(horizontal: 0.01 * PlatformDispatcher.instance.views.first.physicalSize.width / window.devicePixelRatio, vertical: PlatformDispatcher.instance.views.first.physicalSize.height/ window.devicePixelRatio * 0.01),
+                                color: widget.overlayBackgroundColor,
+                                child: AnimatedOpacity(
+                                  opacity: overlayVisible && hasPlayedOnce ? 1.0 : 0.0,
+                                  duration: const Duration(milliseconds: 500),
+                                  child: Column(
+                                    children: [
+                                    
+                                      ValueListenableBuilder<bool>(
+                                        valueListenable: isFullScreenValue,
+                                        builder: (BuildContext context, bool isFullScreen, Widget? child) {
+                                          return Container(
+                                            padding: EdgeInsets.symmetric(horizontal: PlatformDispatcher.instance.views.first.physicalSize.width / window.devicePixelRatio * 0.025),
+                                            child:Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                
+                                                ValueListenableBuilder<String>(
+                                                  valueListenable: displayCurrentDuration,
+                                                  builder: (BuildContext context, String displayCurrentDuration, Widget? child) {
+                                                    return widget.durationEndDisplay == DurationEndDisplay.totalDuration ?
+                                                      Text(
+                                                        '$displayCurrentDuration / ${_formatDuration(videoPlayerController.value.duration)}',
+                                                        style: TextStyle(fontSize: standardTextFontSize)
+                                                      )
+                                                    : 
+                                                      ValueListenableBuilder<Duration>(
+                                                        valueListenable: timeRemaining,
+                                                        builder: (BuildContext context, Duration timeRemaining, Widget? child) {
+                                                          return Text(
+                                                            '$displayCurrentDuration / -${_formatDuration(timeRemaining)}',
+                                                            style: TextStyle(fontSize: standardTextFontSize)
+                                                          );
+                                                        }
+                                                      );
+                                                  }
+                                                ),
+                                                GestureDetector(
+                                                  onTap: () async{
+                                                    if(!isFullScreen){
+                                                      showFullScreenVideoPlayer(context);
+                                                      isFullScreenValue.value = true;
+                                                    }else{
+                                                      Navigator.of(context2).pop();
+                                                      isFullScreenValue.value = false;
+                                                    }
+                                                  },
+                                                  child: Icon(isFullScreen ? Icons.fullscreen_exit : Icons.fullscreen, size: videoControlFullScreenIconSize)
+                                                )
+                                              ]
+                                            )
+                                          );
+                                        }
+                                      ),
+                                        
+                                      SizedBox(
+                                        height: 15,
+                                        child: SliderTheme(
+                                          data: SliderThemeData(
+                                            trackHeight: 3.0,
+                                            thumbColor: widget.thumbColor,
+                                            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 5.0),
+                                            overlayShape: const RoundSliderOverlayShape(overlayRadius: 0.0),
+                                            activeTrackColor: widget.activeTrackColor,
+                                            inactiveTrackColor: widget.inactiveTrackColor
+                                          ),
+                                          child: ValueListenableBuilder<double>(
+                                            valueListenable: currentPosition,
+                                            builder: (BuildContext context, double currentPosition, Widget? child) {
+                                              return Slider(
+                                                min: 0.0,
+                                                max: max(1.0, currentPosition),
+                                                value: currentPosition,
+                                                onChangeStart: ((value){
+                                                  onSliderStart(value);
+                                                }),
+                                                onChanged: (newValue) {
+                                                  onSliderChange(newValue);
+                                                },
+                                                onChangeEnd: (newValue){
+                                                  onSliderEnd(newValue);
+                                                },
+                                              );
+                                            }
+                                          )
+                                        ),
+                                          
+                                      ),
+                                    ]
+                                  
+                                  )
+                                )
+                              )
+                            )
+                            : Container();
+                        }
+                      );
+                    }
+                  )
+                  
+                ),
+              ]
             )
-          ],
-        )
+          ),
+          
+          Positioned(
+            left: 0,
+            child: ValueListenableBuilder<bool>(
+              valueListenable: isRewinding,
+              builder: (BuildContext context, bool isRewinding, Widget? child) {
+                return SizedBox(
+                  width: PlatformDispatcher.instance.views.first.physicalSize.width / window.devicePixelRatio * 0.5,
+                  child: Center(
+                    child: AnimatedOpacity(
+                      opacity: isRewinding ? 1.0 : 0.0,
+                      duration: const Duration(milliseconds: 250),
+                      child: Container(
+                        color: widget.pressablesBackgroundColor,
+                        padding: EdgeInsets.all(PlatformDispatcher.instance.views.first.physicalSize.width / window.devicePixelRatio * 0.02),
+                        child: const Icon(FontAwesomeIcons.backward, size: 30)
+                      )
+                    )
+                  )
+                );
+              }
+            )
+          ),
+          Positioned(
+            right: 0,
+            child: ValueListenableBuilder<bool>(
+              valueListenable: isSkipping,
+              builder: (BuildContext context, bool isSkipping, Widget? child) {
+                return SizedBox(
+                  width: PlatformDispatcher.instance.views.first.physicalSize.width / window.devicePixelRatio * 0.5,
+                  child: Center(
+                    child: AnimatedOpacity(
+                      opacity: isSkipping ? 1.0 : 0.0,
+                      duration: const Duration(milliseconds: 250),
+                      child: Container(
+                        color: widget.pressablesBackgroundColor,
+                        padding: EdgeInsets.all(PlatformDispatcher.instance.views.first.physicalSize.width / window.devicePixelRatio * 0.02),
+                        child: const Icon(FontAwesomeIcons.forward, size: 30)
+                      )
+                    )
+                  )
+                );
+              }
+            )
+          )
+        ],
       )
     );
 
@@ -679,21 +674,19 @@ class CustomVideoPlayerState extends State<CustomVideoPlayer> {
   
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: VisibilityDetector(
-        key: ObjectKey(context),
-        onVisibilityChanged: (info) {
-          var visibleFraction = info.visibleFraction;
-          if(visibleFraction < 1.0){
-            playerController.value.pause();
-          }
-          if(visibleFraction == 1.0){
-          }
-        },
-        child: playerController.value.value.isInitialized ? 
-          videoPlayerComponent(playerController.value, context)
-        : Center(child: CircularProgressIndicator())
-      )
+    return VisibilityDetector(
+      key: ObjectKey(context),
+      onVisibilityChanged: (info) {
+        var visibleFraction = info.visibleFraction;
+        if(visibleFraction < 1.0){
+          playerController.value.pause();
+        }
+        if(visibleFraction == 1.0){
+        }
+      },
+      child: playerController.value.value.isInitialized ? 
+        videoPlayerComponent(playerController.value, context)
+      : const Center(child: CircularProgressIndicator())
     );
   }
 }

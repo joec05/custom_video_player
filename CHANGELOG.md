@@ -9,3 +9,15 @@ Fix errors, update the platform's compatibility', re-fix the sizing system, add 
 ## 1.0.2
 
 Adding example codes and fixing deprecated codes.
+
+## 1.0.3
+
+fix static analysis
+
+## 1.0.4
+
+fix static analysis
+
+## 1.0.5
+
+handle 'window' deprecation
