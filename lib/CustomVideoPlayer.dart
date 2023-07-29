@@ -90,7 +90,7 @@ class CustomVideoPlayerState extends State<CustomVideoPlayer> {
     if(widget.videoSourceType != VideoSourceType.file){
       initializeController(widget.videoUrl);
     }else{ //if the video source is a file
-      playerController = ValueNotifier(widget.playerController!);
+      playerController.value = widget.playerController!;
       playerController.value.addListener(() {
         updateCurrentPosition();
         updateOverlayIcon();
