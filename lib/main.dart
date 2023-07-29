@@ -1,5 +1,9 @@
+import 'dart:io';
+
 import 'package:custom_video_player/CustomVideoPlayer.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:video_player/video_player.dart';
 
 void main() {
   runApp(const MyApp());
@@ -33,6 +37,32 @@ class _MyHomePageState extends State<MyHomePage> {
   String videoUrl = 'https://www.shutterstock.com/shutterstock/videos/1103928479/preview/stock-footage-one-hour-neon-digital-negative-countdown-timer-hour-digital-negative-countdown-neon-one-hour.webm';
   String videoLocation = 'assets/videos/video1.mov';
 
+  ValueNotifier<String> videoLink = ValueNotifier('');
+  VideoPlayerController playerController = VideoPlayerController.file(File(''));
+  ImagePicker _picker = ImagePicker();
+  ValueNotifier<double> width = ValueNotifier(200);
+  ValueNotifier<double> height = ValueNotifier(350);
+
+  Future<void> pickVideo() async {
+    try {
+      if(videoLink.value.isEmpty){
+        final XFile? pickedFile = await _picker.pickVideo(
+          source: ImageSource.gallery,
+        );
+        if(pickedFile != null ){
+          String videoLUri = pickedFile.path;
+          videoLink.value = videoLUri;
+          VideoPlayerController getController = VideoPlayerController.file(File(videoLUri));
+          await getController.initialize();
+          setState(() {
+            playerController = getController;
+          });
+        }
+      }
+    } catch (e) {
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,8 +70,7 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: ListView(
           children: <Widget>[
             CustomVideoPlayer(
               skipDuration: 30000, //how many milliseconds you want to skip
@@ -74,6 +103,73 @@ class _MyHomePageState extends State<MyHomePage> {
               pressablesBackgroundColor: Colors.transparent, //background color of the pressable icons such as play, pause, replay, and menu
               overlayDisplayDuration: 3000, //how long to display the overlay before it disappears, in ms
             ),
+            ValueListenableBuilder<String>(
+              valueListenable: videoLink,
+              builder: (BuildContext context, String videoLinkStr, Widget? child){
+                return videoLinkStr.isEmpty ?
+                  ElevatedButton(
+                    onPressed: () => pickVideo(),
+                    child: Text('Pick Video')
+                  )
+                :
+                  Stack(
+                    children: [
+                      ValueListenableBuilder<double>(
+                        valueListenable: width,
+                        builder: (BuildContext context, double width, Widget? child){
+                          return ValueListenableBuilder<double>(
+                            valueListenable: height,
+                            builder: (BuildContext context, double height, Widget? child){
+                              return CustomVideoPlayer(
+                                playerController: playerController,
+                                skipDuration: 10000, rewindDuration: 10000, videoSourceType: VideoSourceType.file, 
+                                durationEndDisplay: DurationEndDisplay.remainingDuration, displayMenu: false, 
+                                thumbColor: Colors.red, activeTrackColor: Colors.black, inactiveTrackColor: Colors.grey, 
+                                overlayBackgroundColor: Colors.transparent, 
+                                pressablesBackgroundColor: Colors.amber,
+                                overlayDisplayDuration: 5000
+                              );
+                            }
+                          );
+                        }
+                      ),
+                      Positioned(
+                        top: 5, right: 0.03 * getScreenWidth(),
+                        child: Container(
+                          width: 0.075 * getScreenWidth(),
+                          height: 0.075 * getScreenWidth(),
+                          decoration: BoxDecoration(
+                            color: Colors.black,
+                            shape: BoxShape.circle,
+                          ),
+                          child: GestureDetector(
+                            onTap: (){
+                              videoLink.value = '';
+                              width.value = 200;
+                              height.value = 350;
+                            },
+                            child: Icon(Icons.delete, size: 25, color: Colors.white)
+                          )
+                        )
+                      ),
+                      Positioned(
+                        top: 5, right: 0.13 * getScreenWidth(),
+                        child: Container(
+                          width: 0.075 * getScreenWidth(),
+                          height: 0.075 * getScreenWidth(),
+                          decoration: BoxDecoration(
+                            color: Colors.black,
+                            shape: BoxShape.circle,
+                          ),
+                          child: GestureDetector(
+                            child: Icon(Icons.edit, size: 25, color: Colors.white)
+                          )
+                        )
+                      ),
+                    ],
+                  );
+              }
+            )
           ],
         ),
       ),

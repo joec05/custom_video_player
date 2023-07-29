@@ -50,7 +50,7 @@ class CustomVideoPlayer extends StatefulWidget {
 }
 
 class CustomVideoPlayerState extends State<CustomVideoPlayer> {
-  late ValueNotifier<VideoPlayerController> playerController;
+  ValueNotifier<VideoPlayerController> playerController = ValueNotifier(VideoPlayerController.asset(''));
   ValueNotifier<Duration> timeRemaining = ValueNotifier(Duration.zero);
   ValueNotifier<bool> overlayVisible = ValueNotifier(true);
   Timer? _overlayTimer;
@@ -90,7 +90,7 @@ class CustomVideoPlayerState extends State<CustomVideoPlayer> {
     if(widget.videoSourceType != VideoSourceType.file){
       initializeController(widget.videoUrl);
     }else{ //if the video source is a file
-      playerController.value = widget.playerController!;
+      playerController = ValueNotifier(widget.playerController!);
       playerController.value.addListener(() {
         updateCurrentPosition();
         updateOverlayIcon();
@@ -691,4 +691,10 @@ class CustomVideoPlayerState extends State<CustomVideoPlayer> {
   }
 }
 
+double getScreenHeight(){
+  return PlatformDispatcher.instance.views.first.physicalSize.height / PlatformDispatcher.instance.views.first.devicePixelRatio;
+}
 
+double getScreenWidth(){
+  return PlatformDispatcher.instance.views.first.physicalSize.width / PlatformDispatcher.instance.views.first.devicePixelRatio;
+}

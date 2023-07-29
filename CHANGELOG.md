@@ -29,3 +29,7 @@ handle 'window' deprecation in devicePixelRatio
 ## 1.0.7
 
 fix buffering when handling file video type
+
+## 1.0.8
+
+fix uninitialized error. (DO NOT USE)
