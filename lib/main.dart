@@ -152,20 +152,6 @@ class _MyHomePageState extends State<MyHomePage> {
                           )
                         )
                       ),
-                      Positioned(
-                        top: 5, right: 0.13 * getScreenWidth(),
-                        child: Container(
-                          width: 0.075 * getScreenWidth(),
-                          height: 0.075 * getScreenWidth(),
-                          decoration: BoxDecoration(
-                            color: Colors.black,
-                            shape: BoxShape.circle,
-                          ),
-                          child: GestureDetector(
-                            child: Icon(Icons.edit, size: 25, color: Colors.white)
-                          )
-                        )
-                      ),
                     ],
                   );
               }
