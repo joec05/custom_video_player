@@ -28,14 +28,14 @@ This video player package is a custom video player made specifically for Flutter
 
 ## How to use this package
 
-If you want to display a video which source comes from a network, 
+Make sure to initialize the video player controller before passing it to the plugin, otherwise the video player won't load at all.
 
 ```dart
-CustomVideoPlayer(
-    skipDuration: 10000, //how many milliseconds you want to skip
-    rewindDuration: 10000, //how many milliseconds you want to rewind
+ CustomVideoPlayer(
+    playerController: playerController,
+    skipDuration: 30000, //how many milliseconds you want to skip
+    rewindDuration: 30000, //how many milliseconds you want to rewind
     videoSourceType: VideoSourceType.network, //the source of the video: assets, file, network,
-    videoUrl: videoUrl, //the url of your video, if the source is network
     durationEndDisplay: DurationEndDisplay.totalDuration, //whether to display in total duration or remaining duration
     displayMenu: true, //whether to display menu
     thumbColor: Colors.red, //color of the slider's thumb
@@ -46,41 +46,4 @@ CustomVideoPlayer(
     overlayDisplayDuration: 3000, //how long to display the overlay before it disappears, in ms
 )
 ```
-
-If you wanted to display a video which source comes from an asset,
-
-```dart
-CustomVideoPlayer(
-    skipDuration: 5000, //how many milliseconds you want to skip
-    rewindDuration: 5000, //how many milliseconds you want to rewind
-    videoSourceType: VideoSourceType.asset, //the source of the video: asset, file, network,
-    videoLocation: videoLocation, //the location of your video, if the source is asset
-    durationEndDisplay: DurationEndDisplay.remainingDuration, //whether to display in total duration or remaining duration
-    displayMenu: false, //whether to display menu
-    thumbColor: Colors.brown, //color of the slider's thumb
-    activeTrackColor: Colors.indigo, //color of active tracks
-    inactiveTrackColor: Colors.grey, //color of inactive tracks
-    overlayBackgroundColor: Colors.grey.withOpacity(0.5), //color of the overlay's background
-    pressablesBackgroundColor: Colors.deepOrange, //background color of the pressable icons such as play, pause, replay, and menu
-    overlayDisplayDuration: 3000, //how long to display the overlay before it disappears, in ms,
-)
-```
-
-If you wanted to display a video which source comes from a file, 
-
-```dart
-CustomVideoPlayer(
-    skipDuration: 5000, //how many milliseconds you want to skip
-    rewindDuration: 5000, //how many milliseconds you want to rewind
-    videoSourceType: VideoSourceType.file, //the source of the video: asset, file, network,
-    playerController: playerController, //the VideoPlayerController of your video, if the source is file
-    durationEndDisplay: DurationEndDisplay.remainingDuration, //whether to display in total duration or remaining duration
-    displayMenu: false, //whether to display menu
-    thumbColor: Colors.green, //color of the slider's thumb
-    activeTrackColor: Colors.cyan, //color of active tracks
-    inactiveTrackColor: Colors.magenta, //color of inactive tracks
-    overlayBackgroundColor: Colors.grey.withOpacity(0.5), //color of the overlay's background
-    pressablesBackgroundColor: Colors.white, //background color of the pressable icons such as play, pause, replay, and menu
-    overlayDisplayDuration: 5000, //how long to display the overlay before it disappears, in ms
-)```
 

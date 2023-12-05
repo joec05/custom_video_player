@@ -4,7 +4,6 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:video_player/video_player.dart';
-import 'package:visibility_detector/visibility_detector.dart';
 import 'dart:math';
 
 enum AudioState{
@@ -21,12 +20,10 @@ enum DurationEndDisplay{
 }
 
 class CustomVideoPlayer extends StatefulWidget {
-  final String? videoUrl;
-  final VideoPlayerController? playerController;
+  final VideoPlayerController playerController;
   final int skipDuration;
   final int rewindDuration;
   final VideoSourceType videoSourceType;
-  final String? videoLocation;
   final DurationEndDisplay durationEndDisplay;
   final bool displayMenu;
   final Color thumbColor;
@@ -37,8 +34,8 @@ class CustomVideoPlayer extends StatefulWidget {
   final int overlayDisplayDuration;
 
   const CustomVideoPlayer({
-    Key? key, this.videoUrl, this.playerController, required this.skipDuration, 
-    required this.rewindDuration, required this.videoSourceType, this.videoLocation, 
+    Key? key, required this.playerController, required this.skipDuration, 
+    required this.rewindDuration, required this.videoSourceType,
     required this.durationEndDisplay, required this.displayMenu, required this.thumbColor,
     required this.activeTrackColor, required this.inactiveTrackColor,
     required this.overlayBackgroundColor, required this.pressablesBackgroundColor,
@@ -87,32 +84,18 @@ class CustomVideoPlayerState extends State<CustomVideoPlayer> {
   @override
   void initState(){
     super.initState();
-    if(widget.videoSourceType != VideoSourceType.file){
-      initializeController(widget.videoUrl);
-    }else{ //if the video source is a file
-      playerController = ValueNotifier(widget.playerController!);
+    setupController();
+  }
+
+  void setupController() async{
+    if(widget.playerController.value.isInitialized){
+      playerController = ValueNotifier(widget.playerController);
       playerController.value.addListener(() {
         updateCurrentPosition();
         updateOverlayIcon();
       });
       playerController.value.setLooping(false);
     }
-  }
-
-  void initializeController(url) async{
-    if(widget.videoSourceType == VideoSourceType.network){//if the video source is a network
-      playerController = ValueNotifier(VideoPlayerController.networkUrl(Uri.parse(url)));
-    }else if(widget.videoSourceType == VideoSourceType.asset){
-      playerController = ValueNotifier(VideoPlayerController.asset(widget.videoLocation!)); //if the video source is an asset
-    }
-    playerController.value.addListener(() {
-      if(mounted){
-        updateCurrentPosition();
-        updateOverlayIcon();
-      }
-    });
-    playerController.value.setLooping(false);
-    await playerController.value.initialize();
   }
 
   void updateCurrentPosition(){ //update position of slider while video is playing as well as the time remaining
@@ -184,7 +167,6 @@ class CustomVideoPlayerState extends State<CustomVideoPlayer> {
   @override
   void dispose() {
     _overlayTimer?.cancel(); //dispose the timer
-    playerController.value.dispose(); //dispose the VideoPlayerController
     super.dispose();
   }
   
@@ -674,20 +656,9 @@ class CustomVideoPlayerState extends State<CustomVideoPlayer> {
   
   @override
   Widget build(BuildContext context) {
-    return VisibilityDetector(
-      key: ObjectKey(context),
-      onVisibilityChanged: (info) {
-        var visibleFraction = info.visibleFraction;
-        if(visibleFraction < 1.0){
-          playerController.value.pause();
-        }
-        if(visibleFraction == 1.0){
-        }
-      },
-      child: playerController.value.value.isInitialized ? 
-        videoPlayerComponent(playerController.value, context)
-      : const Center(child: CircularProgressIndicator())
-    );
+    return playerController.value.value.isInitialized ? 
+      videoPlayerComponent(playerController.value, context)
+    : const Center(child: CircularProgressIndicator());
   }
 }
 

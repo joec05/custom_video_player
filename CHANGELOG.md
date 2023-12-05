@@ -33,3 +33,7 @@ fix buffering when handling file video type
 ## 1.0.8
 
 fix uninitialized error. (DO NOT USE)
+
+## 1.0.9
+
+remove auto pause, fix arguments and remove boilerplate codes
